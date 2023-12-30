@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Generative AI Chat</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      body {
+        background-color: #2e2e2e;
+        color: #d0d0d0;
+        font-family: "Courier New", Courier, monospace;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .container {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+        margin-top: 25px;
+        position: relative;
+      }
+
+      h1 {
+        color: #61dafb;
+        font-weight: bold;
+        font-size: 24px;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px #3ae374;
+      }
+
+      h1::after {
+        content: "|";
+        display: inline-block;
+        animation: blink 1s infinite;
+        margin-left: 5px;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* Add more media queries as needed for larger screens */
+
+      h1 {
+        font-size: 20px;
+      }
+
+      form {
+        max-width: 100%;
+      }
+
+      .window-controls {
+        top: 5px;
+        left: 5px;
+      }
+
+      form {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .btn-primary {
+        background-color: #61dafb;
+        border-color: #61dafb;
+        font-weight: bold;
+      }
+
+      .btn-primary:hover {
+        background-color: #4fa3d1;
+        border-color: #4fa3d1;
+      }
+
+      .loader {
+        --size-loader: 30px;
+        --size-orbe: 6px;
+        width: var(--size-loader);
+        height: var(--size-loader);
+        position: relative;
+        transform: rotate(45deg);
+        display: none;
+      }
+
+      .orbe {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        --delay: calc(var(--index) * 0.1s);
+        animation: orbit7456 ease-in-out 1.5s var(--delay) infinite;
+        opacity: calc(1 - calc(0.2 * var(--index)));
+      }
+
+      .orbe::after {
+        position: absolute;
+        content: "";
+        top: 0;
+        left: 0;
+        width: var(--size-orbe);
+        height: var(--size-orbe);
+        background-color: #3ae374;
+        box-shadow: 0px 0px 10px 1px #3ae374;
+        border-radius: 50%;
+      }
+
+      #ai-response-placeholder {
+        margin-top: 20px;
+        font-style: italic;
+        color: #808080;
+      }
+
+      .window-controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+      }
+
+      .window-button {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin-right: 5px;
+        background-color: #808080;
+        cursor: pointer;
+      }
+
+      .window-button:hover {
+        background-color: #404040;
+      }
+
+      @keyframes orbit7456 {
+        0% {
+        }
+
+        80% {
+          transform: rotate(360deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .chat-container {
+        margin-top: 20px;
+        max-height: 390px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .chat-container::-webkit-scrollbar {
+        width: 0;
+      }
+
+      @media only screen and (max-width: 767px) {
+        .container {
+          margin-top: 20px; /* Adjust margin for smaller screens */
+          max-height: 80vh; /* Set a maximum height and allow overflow for scrolling */
+          overflow-y: auto; /* Add vertical scroll if content exceeds the container height */
+        }
+
+        h1 {
+          font-size: 18px; /* Decrease font size for smaller screens */
+        }
+
+        .window-controls {
+          top: 2px; /* Adjust window controls position for smaller screens */
+        }
+
+        form {
+          max-width: 100%;
+        }
+
+        .form-group {
+          margin-bottom: 15px; /* Decrease margin for smaller screens */
+        }
+
+        .loader {
+          --size-loader: 20px; /* Decrease loader size for smaller screens */
+        }
+
+        .orbe::after {
+          width: var(--size-orbe);
+          height: var(--size-orbe);
+        }
+
+        .chat-container {
+          max-height: none; /* Allow chat container to expand on smaller screens */
+        }
+
+        .message-container {
+          width: 100%; /* Ensure message container takes full width on smaller screens */
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="window-controls">
+        <div class="window-button"></div>
+        <div class="window-button"></div>
+        <div class="window-button"></div>
+      </div>
+
+      <h1 class="mb-4" id="typingText">Generative AI Chat</h1>
+
+      <div class="chat-container">
+        <form action="/ask" method="post" id="chatForm">
+          <div class="form-group">
+            <input
+              type="text"
+              class="form-control"
+              id="user_input"
+              name="user_input"
+              placeholder="Your message"
+              required
+            />
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary btn-block"
+            onclick="ask()"
+          >
+            Ask
+          </button>
+
+          <div class="loader">
+            <div class="orbe" style="--index: 0"></div>
+            <div class="orbe" style="--index: 1"></div>
+            <div class="orbe" style="--index: 2"></div>
+            <div class="orbe" style="--index: 3"></div>
+            <div class="orbe" style="--index: 4"></div>
+          </div>
+
+          <div id="ai-response-placeholder">
+            Intelligence beyond imagination.
+          </div>
+        </form>
+
+        <div class="message-container">
+          {% if user_input %}
+          <div class="alert alert-info">
+            <strong>You:</strong> {{ user_input }}
+          </div>
+          {% endif %} {% if response %}
+          <div class="alert alert-success">
+            <strong>AI:</strong>
+            <pre><code>{{ response }}</code></pre>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+      var userInputElement = document.getElementById("user_input");
+      var aiResponseElement = document.getElementById(
+        "ai-response-placeholder"
+      );
+      var typingTextElement = document.getElementById("typingText");
+
+      function type(element, text) {
+        var index = 0;
+
+        function typeText() {
+          element.textContent = text.slice(0, index++);
+          if (index <= text.length) {
+            setTimeout(typeText, 100);
+          }
+        }
+
+        typeText();
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        type(typingTextElement, "Generative AI Chat");
+      });
+
+      function ask() {
+        var form = document.getElementById("chatForm");
+        var button = form.querySelector("button");
+        var loader = form.querySelector(".loader");
+
+        button.style.display = "none";
+        loader.style.display = "block";
+
+        aiResponseElement.textContent = "";
+        type(aiResponseElement, "Resposne is getting ready. Please wait!");
+
+        form.submit();
+      }
+    </script>
+  </body>
+</html>
