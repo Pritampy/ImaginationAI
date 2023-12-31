@@ -7,7 +7,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-    <title>Generative AI Chat</title>
+    <title>Imagination AI</title>
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -20,6 +20,98 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
+      }
+      .line-wobble {
+        --uib-size: 80px;
+        --uib-speed: 1.55s;
+        --uib-color: #61dafb; /* Adjust color as needed */
+        --uib-line-weight: 5px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: var(--uib-line-weight);
+        width: var(--uib-size);
+        border-radius: calc(var(--uib-line-weight) / 2);
+        overflow: hidden;
+        transform: translate3d(0, 0, 0);
+        display: none; /* Initially hide the loader for mobile screens */
+      }
+
+      .line-wobble::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: var(--uib-color);
+        opacity: 0.1;
+      }
+
+      .line-wobble::after {
+        content: "";
+        height: 100%;
+        width: 100%;
+        border-radius: calc(var(--uib-line-weight) / 2);
+        animation: wobble var(--uib-speed) ease-in-out infinite;
+        transform: translateX(-90%);
+        background-color: var(--uib-color);
+      }
+
+      @keyframes wobble {
+        0%,
+        100% {
+          transform: translateX(-90%);
+        }
+
+        50% {
+          transform: translateX(90%);
+        }
+      }
+
+      @media only screen and (max-width: 767px) {
+        /* Styles for smaller screens */
+        .container {
+          margin-top: 20px;
+          max-height: 80vh;
+          overflow-y: auto;
+        }
+
+        h1 {
+          font-size: 18px;
+        }
+        .mb-4, .my-4 {
+            margin-bottom: 1.5rem!important;
+            margin-top: 1.5rem!important;
+        }
+
+        .window-controls {
+          top: 15px;
+        }
+
+        form {
+          max-width: 100%;
+        }
+
+        .form-group {
+          margin-bottom: 15px;
+        }
+
+        .loader {
+          display: none; /* Hide the original loader on mobile screens */
+        }
+
+        .line-wobble {
+          margin-top: 20px;
+        }
+      }
+
+      @media only screen and (min-width: 768px) {
+        /* Styles for desktop screens */
+        .line-wobble {
+          margin-top: 20px;
+        }
       }
 
       .container {
@@ -158,7 +250,7 @@
       }
       .chat-container {
         margin-top: 20px;
-        max-height: 390px;
+        max-height: 600px;
         overflow-y: auto;
         overflow-x: hidden;
       }
@@ -179,7 +271,7 @@
         }
 
         .window-controls {
-          top: 2px; /* Adjust window controls position for smaller screens */
+          top: 15px; /* Adjust window controls position for smaller screens */
         }
 
         form {
@@ -218,7 +310,7 @@
         <div class="window-button"></div>
       </div>
 
-      <h1 class="mb-4" id="typingText">Generative AI Chat</h1>
+      <h1 class="mb-4" id="typingText">Imagination AI</h1>
 
       <div class="chat-container">
         <form action="/ask" method="post" id="chatForm">
@@ -248,10 +340,11 @@
             <div class="orbe" style="--index: 3"></div>
             <div class="orbe" style="--index: 4"></div>
           </div>
-
+          <div class="line-wobble"></div>
           <div id="ai-response-placeholder">
-            Intelligence beyond imagination.
-          </div>
+              Intelligence beyond imagination.
+             <button class="btn btn-secondary btn-sm" onclick="copyResponse()">Copy</button>
+        </div>
         </form>
 
         <div class="message-container">
@@ -279,6 +372,8 @@
         "ai-response-placeholder"
       );
       var typingTextElement = document.getElementById("typingText");
+      var lineWobbleElement = document.querySelector(".line-wobble");
+      var originalLoaderElement = document.querySelector(".loader");
 
       function type(element, text) {
         var index = 0;
@@ -294,7 +389,7 @@
       }
 
       document.addEventListener("DOMContentLoaded", function () {
-        type(typingTextElement, "Generative AI Chat");
+        type(typingTextElement, "Imagination AI");
       });
 
       function ask() {
@@ -302,8 +397,20 @@
         var button = form.querySelector("button");
         var loader = form.querySelector(".loader");
 
+        if (userInputElement.value.trim() === "") {
+          alert("Please enter a message before asking.");
+          return;
+        }
+
+        if (window.innerWidth <= 767) {
+          lineWobbleElement.style.display = "flex";
+          originalLoaderElement.style.display = "none";
+        } else {
+          originalLoaderElement.style.display = "block";
+          lineWobbleElement.style.display = "none";
+        }
+
         button.style.display = "none";
-        loader.style.display = "block";
 
         aiResponseElement.textContent = "";
         type(aiResponseElement, "Resposne is getting ready. Please wait!");
